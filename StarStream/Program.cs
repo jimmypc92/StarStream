@@ -7,7 +7,7 @@
     {
         static void Main(string[] args)
         {
-            string channel = "nl_kripp";
+            string channel = "";
 
             var channelInfo = new ChannelInfo(channel);
 
