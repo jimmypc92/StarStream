@@ -9,14 +9,20 @@
     {
         private Queue<string> _queue;
         private string _m3u8Uri;
-        private string _rootDir;
         private Thread _m3u8Thread;
         private Thread _tsThread;
         private bool _shouldStop;
-        private M3U8 _m3u8;
 
-        public Action<byte[]> ReceivedSegment { get; set; }
+        public Action<string> ReceivedInitialM3u8 { get; set; }
+        public Action<TsSegment> ReceivedSegment { get; set; }
         public Action<string[]> RecievedExtinf { get; set; }
+
+        public bool Consuming {
+            get {
+                return this._m3u8Thread != null && this._m3u8Thread.IsAlive
+                    || this._tsThread != null && this._tsThread.IsAlive;
+            }
+        }
 
         public HlsConsumer(string m3u8Uri)
         {
@@ -40,6 +46,7 @@
         private void _ConsumeTs(object threadStartParam)
         {
             string tsUrl = _m3u8Uri.Substring(0, this._m3u8Uri.IndexOf("index-live.m3u8"));
+            TsSegment currentSegment;
 
             using (HttpClient client = new HttpClient()) {
 
@@ -55,8 +62,12 @@
                     var res = client.GetAsync(url).Result;
                     var bytes = res.Content.ReadAsByteArrayAsync().Result;
 
+                    currentSegment = new TsSegment();
+                    currentSegment.Content = bytes;
+                    currentSegment.Name = indexPath;
+
                     if(this.ReceivedSegment != null) {
-                        this.ReceivedSegment(bytes);
+                        this.ReceivedSegment(currentSegment);
                     }
                 }
             }
@@ -69,8 +80,14 @@
 
             using (HttpClient client = new HttpClient()) {
 
+                string content = client.GetAsync(this._m3u8Uri).Result.Content.ReadAsStringAsync().Result;
+
+                if(this.ReceivedInitialM3u8 != null) {
+                    this.ReceivedInitialM3u8(content);
+                }
+
                 while (!_shouldStop) {
-                    string content = client.GetAsync(this._m3u8Uri).Result.Content.ReadAsStringAsync().Result;
+                    content = client.GetAsync(this._m3u8Uri).Result.Content.ReadAsStringAsync().Result;
 
                     var lines = content.Split('\n');
 
@@ -101,5 +118,11 @@
         {
             this._shouldStop = true;
         }
+    }
+
+    public class TsSegment
+    {
+        public byte[] Content { get; set; }
+        public string Name { get; set; }
     }
 }
