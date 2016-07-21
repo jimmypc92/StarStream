@@ -15,7 +15,7 @@
 
         public Action<string> ReceivedInitialM3u8 { get; set; }
         public Action<TsSegment> ReceivedSegment { get; set; }
-        public Action<string[]> RecievedExtinf { get; set; }
+        public Action<Extinf> RecievedExtinf { get; set; }
 
         public bool Consuming {
             get {
@@ -75,7 +75,7 @@
 
         private void _ConsumeM3u8(object threadStartParam)
         {
-            ExtinfIndex extIndex;
+            Extinf extinf;
             int currentIndex = -1;
 
             using (HttpClient client = new HttpClient()) {
@@ -84,6 +84,15 @@
 
                 if(this.ReceivedInitialM3u8 != null) {
                     this.ReceivedInitialM3u8(content);
+
+                    var m3u8 = new M3U8(content);
+                    foreach(var e in m3u8.Extinfs) {
+                        currentIndex = e.Index;
+
+                        // Don't emit extinf received because it is captured in the m3u8 callback
+                        this._queue.Enqueue(e.Path);
+                        Console.WriteLine($"Queueing: {e.Path}");
+                    }
                 }
 
                 while (!_shouldStop) {
@@ -92,19 +101,18 @@
                     var lines = content.Split('\n');
 
                     for (int i = 0; i < lines.Length; i++) {
-                        if (ExtinfIndex.IsExtinfIndex(lines[i])) {
-                            extIndex = new ExtinfIndex(lines[i]);
+                        if (Extinf.IsExtinfPath(lines[i])) {
+                            extinf = new Extinf(lines[i-1], lines[i]);
 
-                            int index = extIndex.Index;
+                            int index = extinf.Index;
 
                             if (index > currentIndex) {
                                 currentIndex = index;
                                 this._queue.Enqueue(lines[i]);
-                                string[] extinf = new string[2];
-                                extinf[0] = lines[i - 1];
-                                extinf[1] = lines[i];
+                                string line = lines[i];
+                                Console.WriteLine($"Queueing: {line}");
 
-                                if(this.RecievedExtinf != null) {
+                                if (this.RecievedExtinf != null) {
                                     this.RecievedExtinf(extinf);
                                 }
                             }
