@@ -7,11 +7,13 @@
     {
         static void Main(string[] args)
         {
-            string channel = "";
+            var streams = TwitchApiWrap.GetStreams();
 
-            var channelInfo = new ChannelInfo(channel);
+            foreach(var stream in streams) {
+                Console.WriteLine(stream);
+            }
 
-            ConsumeM3U8(channelInfo.m3u8Uri);
+            Console.ReadLine();
         }
 
         private static string GetNowPath()
@@ -19,14 +21,15 @@
             return string.Format("result-{0:yyyy-MM-dd_hh-mm-ss_fff_tt}", DateTime.Now);
         }
 
-        private static HlsConsumer ConsumeM3U8(string m3u8Uri)
+        private static HlsConsumer ConsumeChanngel(string channel)
         {
             string folder = GetNowPath();
             string path = Path.Combine(folder, folder + ".m3u8");
 
             Directory.CreateDirectory(folder);
 
-            var consumer = new HlsConsumer(m3u8Uri);
+            var channelInfo = new ChannelInfo(channel);
+            var consumer = new HlsConsumer(channelInfo.m3u8Uri);
 
             consumer.ReceivedInitialM3u8 = (content) => {
                 File.WriteAllText(path, content);
