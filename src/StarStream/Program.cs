@@ -3,6 +3,7 @@
     using System;
     using System.IO;
     using System.Linq;
+
     class Program
     {
         public static Configuration Configuration { get; set; }
@@ -23,7 +24,7 @@
 
         private static void InitializeConfiguration()
         {
-            Configuration = new Configuration("../../configuration.json");
+            Configuration = new Configuration("./configuration.json");
         }
 
         private static string GetNowPath(string prefix = null)
