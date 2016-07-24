@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "StarStream": {
+      "commandName": "Project",
+      "commandLineArgs": "list -n 5"
+    }
+  }
+}

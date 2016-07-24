@@ -55,11 +55,11 @@
             throw new Exception("Could not find m3u8 uri.");
         }
 
-        public static IEnumerable<Stream> GetStreams() {
+        public static IEnumerable<Stream> GetStreams(int offset=0, int limit = 25) {
 
     
             using (var client = new HttpClient()) {
-                var res = client.GetAsync("https://api.twitch.tv/kraken/streams").Result.Content.ReadAsStringAsync().Result;
+                var res = client.GetAsync($"https://api.twitch.tv/kraken/streams?offset={offset}&limit={limit}").Result.Content.ReadAsStringAsync().Result;
 
                 var resource = JsonConvert.DeserializeObject<JObject>(res);
                 var jObjs = resource.Value<JArray>("streams");
