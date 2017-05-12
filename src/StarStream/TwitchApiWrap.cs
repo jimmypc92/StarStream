@@ -11,8 +11,7 @@
     {
         public static ChannelToken GetChannelToken(string channel)
         {
-            using (HttpClient client = new HttpClient()) {
-
+            using (HttpClient client = ClientBuilder.BuildKrakenClient()) {
                 var tokenUri = $"http://api.twitch.tv/api/channels/{channel}/access_token";
 
                 var res = client.GetAsync(tokenUri).Result;
@@ -36,7 +35,7 @@
             var playlistUri = GetPlaylistUri(channel);
             string playlist = "";
 
-            using (HttpClient client = new HttpClient()) {
+            using (HttpClient client = ClientBuilder.BuildKrakenClient()) {
                 playlist = client.GetAsync(playlistUri).Result.Content.ReadAsStringAsync().Result;
             }
             
@@ -58,7 +57,8 @@
         public static IEnumerable<Stream> GetStreams(int offset=0, int limit = 25) {
 
     
-            using (var client = new HttpClient()) {
+            using (HttpClient client = ClientBuilder.BuildKrakenClient())
+            {
                 var res = client.GetAsync($"https://api.twitch.tv/kraken/streams?offset={offset}&limit={limit}").Result.Content.ReadAsStringAsync().Result;
 
                 var resource = JsonConvert.DeserializeObject<JObject>(res);

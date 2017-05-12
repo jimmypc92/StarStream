@@ -1,3 +1,4 @@
 ﻿{
-  "ffmpeg_path": ""
+  "ffmpeg_path": "",
+  "twitch_client_id": ""
 }

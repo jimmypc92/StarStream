@@ -7,6 +7,7 @@
     class Configuration
     {
         public string FfmpegPath { get; set; }
+        public string TwitchClientId { get; set; }
 
         public Configuration(string path)
         {
@@ -14,6 +15,7 @@
             var configObj = JsonConvert.DeserializeObject<JObject>(content);
 
             this.FfmpegPath = configObj.Value<string>("ffmpeg_path");
+            this.TwitchClientId = configObj.Value<string>("twitch_client_id");
         }
     }
 }
