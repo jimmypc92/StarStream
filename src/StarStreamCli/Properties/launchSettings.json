@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "StarStreamCli": {
+      "commandName": "Project",
+      "commandLineArgs": "consume -channel rpglimitbreak"
+    }
+  }
+}

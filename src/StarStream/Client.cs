@@ -7,11 +7,18 @@
     using System.Linq;
     using System.Net.Http;
 
-    class TwitchApiWrap
+    public class Client
     {
-        public static ChannelToken GetChannelToken(string channel)
+        private string _clientId;
+
+        public Client(string clientId)
         {
-            using (HttpClient client = ClientBuilder.BuildKrakenClient()) {
+            this._clientId = clientId;
+        }
+
+        public ChannelToken GetChannelToken(string channel)
+        {
+            using (HttpClient client = GetHttpClient()) {
                 var tokenUri = $"http://api.twitch.tv/api/channels/{channel}/access_token";
 
                 var res = client.GetAsync(tokenUri).Result;
@@ -22,7 +29,7 @@
             }
         }
 
-        public static string GetPlaylistUri (string channel)
+        public string GetPlaylistUri (string channel)
         {
             var cTok = GetChannelToken(channel);
             string random = "123412";
@@ -30,12 +37,12 @@
             return $"http://usher.twitch.tv/api/channel/hls/{channel}.m3u8?player=twitchweb&&token={cTok.Token}&sig={cTok.Sig}&allow_audio_only=true&allow_source=true&type=any&p={random}";
         }
 
-        public static string getM3u8Uri(string channel)
+        public string getM3u8Uri(string channel)
         {
             var playlistUri = GetPlaylistUri(channel);
             string playlist = "";
 
-            using (HttpClient client = ClientBuilder.BuildKrakenClient()) {
+            using (HttpClient client = GetHttpClient()) {
                 playlist = client.GetAsync(playlistUri).Result.Content.ReadAsStringAsync().Result;
             }
             
@@ -54,10 +61,11 @@
             throw new Exception("Could not find m3u8 uri.");
         }
 
-        public static IEnumerable<Stream> GetStreams(int offset=0, int limit = 25) {
+        public IEnumerable<Stream> GetStreams(int offset = 0, int limit = 25)
+        {
 
-    
-            using (HttpClient client = ClientBuilder.BuildKrakenClient())
+
+            using (HttpClient client = GetHttpClient())
             {
                 var res = client.GetAsync($"https://api.twitch.tv/kraken/streams?offset={offset}&limit={limit}").Result.Content.ReadAsStringAsync().Result;
 
@@ -67,6 +75,22 @@
                 return jObjs.Select(o => Stream.FromJObject(o as JObject));
             }
 
+        }
+
+        public ChannelInfo GetChannelInfo(string channel)
+        {
+            ChannelToken token = GetChannelToken(channel);
+            string playlistUri = GetPlaylistUri(channel);
+            string m3u8Uri = getM3u8Uri(channel);
+
+            return new ChannelInfo(token, playlistUri, m3u8Uri);
+        }
+
+        private HttpClient GetHttpClient()
+        {
+            var client = new HttpClient();
+            client.DefaultRequestHeaders.Add("Client-Id", _clientId);
+            return client;
         }
     }
 
@@ -88,11 +112,11 @@
         public string PlaylistUri { get; set; }
         public string m3u8Uri { get; set; }
 
-        public ChannelInfo(string channel)
+        public ChannelInfo(ChannelToken channelToken, string playListUri, string m3u8Uri)
         {
-            this.ChannelToken = TwitchApiWrap.GetChannelToken(channel);
-            this.PlaylistUri = TwitchApiWrap.GetPlaylistUri(channel);
-            this.m3u8Uri = TwitchApiWrap.getM3u8Uri(channel);
+            this.ChannelToken = channelToken;
+            this.PlaylistUri = playListUri;
+            this.m3u8Uri = m3u8Uri;
         }
     }
 

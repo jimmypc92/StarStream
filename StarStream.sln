@@ -12,6 +12,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "StarStream", "src\StarStream\StarStream.xproj", "{84FCDA5A-CD73-4792-A76D-FE236F2862DE}"
 EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "StarStreamCli", "src\StarStreamCli\StarStreamCli.xproj", "{B2EF66E4-D4E5-46FF-8BB8-248C21A4089C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -22,11 +24,16 @@ Global
 		{84FCDA5A-CD73-4792-A76D-FE236F2862DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{84FCDA5A-CD73-4792-A76D-FE236F2862DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{84FCDA5A-CD73-4792-A76D-FE236F2862DE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B2EF66E4-D4E5-46FF-8BB8-248C21A4089C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B2EF66E4-D4E5-46FF-8BB8-248C21A4089C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B2EF66E4-D4E5-46FF-8BB8-248C21A4089C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B2EF66E4-D4E5-46FF-8BB8-248C21A4089C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{84FCDA5A-CD73-4792-A76D-FE236F2862DE} = {76DB0A97-175F-42B6-9CE4-13A7E7D4B73F}
+		{B2EF66E4-D4E5-46FF-8BB8-248C21A4089C} = {76DB0A97-175F-42B6-9CE4-13A7E7D4B73F}
 	EndGlobalSection
 EndGlobal

@@ -5,7 +5,7 @@
     using System.Net.Http;
     using System.Threading;
 
-    class HlsConsumer
+    public class HlsConsumer
     {
         private Queue<string> _queue;
         private string _m3u8Uri;
@@ -15,7 +15,7 @@
 
         public Action<string> ReceivedInitialM3u8 { get; set; }
         public Action<TsSegment> ReceivedSegment { get; set; }
-        public Action<Extinf> RecievedExtinf { get; set; }
+        public Action<Extinf> ReceivedExtinf { get; set; }
 
         public bool Consuming {
             get {
@@ -41,6 +41,11 @@
 
             this._m3u8Thread = new Thread(this._ConsumeM3u8);
             this._m3u8Thread.Start(null);
+        }
+
+        public void Stop()
+        {
+            this._shouldStop = true;
         }
 
         private void _ConsumeTs(object threadStartParam)
@@ -112,8 +117,8 @@
                                 string line = lines[i];
                                 Console.WriteLine($"Queueing: {line}");
 
-                                if (this.RecievedExtinf != null) {
-                                    this.RecievedExtinf(extinf);
+                                if (this.ReceivedExtinf != null) {
+                                    this.ReceivedExtinf(extinf);
                                 }
                             }
                         }
@@ -121,16 +126,5 @@
                 }
             }
         }
-
-        public void Stop()
-        {
-            this._shouldStop = true;
-        }
-    }
-
-    public class TsSegment
-    {
-        public byte[] Content { get; set; }
-        public string Name { get; set; }
     }
 }

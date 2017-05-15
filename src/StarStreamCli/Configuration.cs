@@ -1,10 +1,10 @@
-﻿namespace StarStream
+﻿namespace StarStreamCli
 {
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
     using System.IO;
 
-    class Configuration
+    public class Configuration
     {
         public string FfmpegPath { get; set; }
         public string TwitchClientId { get; set; }

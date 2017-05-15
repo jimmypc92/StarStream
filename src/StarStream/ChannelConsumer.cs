@@ -5,14 +5,21 @@
 
     public class ChannelConsumer
     {
-        public static void Consume(string channel)
+        private Client _client;
+
+        public ChannelConsumer(Client client)
+        {
+            _client = client;
+        }
+
+        public string Consume(string channel)
         {
             string folder = string.Format("{0}_{1:yyyy-MM-dd_hh-mm-ss_fff_tt}", channel, DateTime.Now);
             string path = Path.Combine(folder, folder + ".m3u8");
 
             Directory.CreateDirectory(folder);
 
-            var channelInfo = new ChannelInfo(channel);
+            var channelInfo = _client.GetChannelInfo(channel);
             var consumer = new HlsConsumer(channelInfo.m3u8Uri);
 
             consumer.ReceivedInitialM3u8 = (content) => {
@@ -21,7 +28,7 @@
                 Console.WriteLine(content);
             };
 
-            consumer.RecievedExtinf = (extinf) => {
+            consumer.ReceivedExtinf = (extinf) => {
                 Console.WriteLine($"Received Extinf");
                 using (var sw = File.AppendText(path))
                 {
@@ -43,7 +50,7 @@
             consumer.Stop();
             M3U8.AppendEnding(path);
 
-            ConversionUtil.ConvertM3u8ToMp4(path);
+            return path;
         }
 
         private static void WaitForUserInput()

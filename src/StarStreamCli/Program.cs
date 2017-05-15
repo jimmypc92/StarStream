@@ -1,15 +1,15 @@
-﻿namespace StarStream
+﻿namespace StarStreamCli
 {
+    using StarStream;
     using System;
     using System.Collections.Generic;
-    using System.IO;
     using System.Linq;
 
     class Program
     {
         public static Configuration Configuration { get; set; }
 
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
             InitializeConfiguration();
 
@@ -59,7 +59,7 @@
 
         private static void Help(string command = null)
         {
-            Console.WriteLine("usage: StarStream <command> [<args>]");
+            Console.WriteLine("usage: StarStreamCli <command> [<args>]");
             Console.WriteLine();
 
             string list = "List";
@@ -88,7 +88,11 @@
                 return;
             }
 
-            ChannelConsumer.Consume(channel);
+            var client = new Client(Configuration.TwitchClientId);
+            var consumer = new ChannelConsumer(client);
+            Ffmpeg ffmpeg = new Ffmpeg(Configuration.FfmpegPath);
+
+            ffmpeg.ConvertM3u8ToMp4(consumer.Consume(channel));
         }
 
         private static void ListStreams(Dictionary<string, string> options = null)
@@ -108,7 +112,8 @@
             }
 
             while (true) {
-                var streams = TwitchApiWrap.GetStreams(offset, perPage).ToArray();
+                var client = new Client(Configuration.TwitchClientId);
+                var streams = client.GetStreams(offset, perPage).ToArray();
                 Console.WriteLine("Listing streams {0}-{1}", offset + 1, offset + perPage);
 
                 for (int i = 0; i < streams.Length; i++) {
