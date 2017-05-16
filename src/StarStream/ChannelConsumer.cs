@@ -6,32 +6,34 @@
     public class ChannelConsumer
     {
         private Client _client;
+        private HlsConsumer _consumer;
+        private string _m3u8OutputPath;
 
         public ChannelConsumer(Client client)
         {
             _client = client;
         }
 
-        public string Consume(string channel)
+        public string Consume(string channel, string outputDirectory)
         {
-            string folder = string.Format("{0}_{1:yyyy-MM-dd_hh-mm-ss_fff_tt}", channel, DateTime.Now);
-            string path = Path.Combine(folder, folder + ".m3u8");
+            if (!Directory.Exists(outputDirectory)) {
+                Directory.CreateDirectory(outputDirectory);
+            }
 
-            Directory.CreateDirectory(folder);
+            _m3u8OutputPath = Path.Combine(outputDirectory, outputDirectory + ".m3u8");
 
             var channelInfo = _client.GetChannelInfo(channel);
-            var consumer = new HlsConsumer(channelInfo.m3u8Uri);
+            _consumer = new HlsConsumer(channelInfo.m3u8Uri);
 
-            consumer.ReceivedInitialM3u8 = (content) => {
-                File.WriteAllText(path, content);
+            _consumer.ReceivedInitialM3u8 = (content) => {
+                File.WriteAllText(_m3u8OutputPath, content);
                 Console.WriteLine("Received Initial m3u8.");
                 Console.WriteLine(content);
             };
 
-            consumer.ReceivedExtinf = (extinf) => {
+            _consumer.ReceivedExtinf = (extinf) => {
                 Console.WriteLine($"Received Extinf");
-                using (var sw = File.AppendText(path))
-                {
+                using (var sw = File.AppendText(_m3u8OutputPath)) {
                     sw.Write(extinf.Marker);
                     sw.Write(M3U8.LINE_END);
                     sw.Write(extinf.Path);
@@ -39,31 +41,20 @@
                 }
             };
 
-            consumer.ReceivedSegment = (seg) => {
+            _consumer.ReceivedSegment = (seg) => {
                 Console.WriteLine($"Received segment {seg.Name}.");
-                File.WriteAllBytes(Path.Combine(folder, seg.Name), seg.Content);
+                File.WriteAllBytes(Path.Combine(outputDirectory, seg.Name), seg.Content);
             };
 
-            consumer.Consume();
-            WaitForUserInput();
-
-            consumer.Stop();
-            M3U8.AppendEnding(path);
-
-            return path;
+            _consumer.Consume();
+            return _m3u8OutputPath;
         }
 
-        private static void WaitForUserInput()
+        public void Stop()
         {
-            var then = DateTime.UtcNow;
-            while (!Console.KeyAvailable)
-            {
-
-                if (DateTime.UtcNow - then > TimeSpan.FromSeconds(3))
-                {
-                    Console.WriteLine("Press any key to stop.");
-                    then = DateTime.UtcNow;
-                }
+            if (_consumer != null) {
+                _consumer.Stop();
+                M3U8.AppendEnding(_m3u8OutputPath);
             }
         }
     }

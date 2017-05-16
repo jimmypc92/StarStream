@@ -91,8 +91,9 @@
             var client = new Client(Configuration.TwitchClientId);
             var consumer = new ChannelConsumer(client);
             Ffmpeg ffmpeg = new Ffmpeg(Configuration.FfmpegPath);
+            string outDir = string.Format("{0}_{1:yyyy-MM-dd_hh-mm-ss_fff_tt}", channel, DateTime.Now);
 
-            ffmpeg.ConvertM3u8ToMp4(consumer.Consume(channel));
+            ffmpeg.ConvertM3u8ToMp4(consumer.Consume(channel, outDir));
         }
 
         private static void ListStreams(Dictionary<string, string> options = null)
@@ -140,6 +141,18 @@
                 }
                 else {
                     Console.WriteLine("Unknown input received.");
+                }
+            }
+        }
+
+        private static void WaitForUserInput()
+        {
+            var then = DateTime.UtcNow;
+            while (!Console.KeyAvailable) {
+
+                if (DateTime.UtcNow - then > TimeSpan.FromSeconds(3)) {
+                    Console.WriteLine("Press any key to stop.");
+                    then = DateTime.UtcNow;
                 }
             }
         }

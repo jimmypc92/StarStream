@@ -17,17 +17,17 @@
         public Action<TsSegment> ReceivedSegment { get; set; }
         public Action<Extinf> ReceivedExtinf { get; set; }
 
+        public HlsConsumer(string m3u8Uri)
+        {
+            this._queue = new Queue<string>();
+            this._m3u8Uri = m3u8Uri;
+        }
+
         public bool Consuming {
             get {
                 return this._m3u8Thread != null && this._m3u8Thread.IsAlive
                     || this._tsThread != null && this._tsThread.IsAlive;
             }
-        }
-
-        public HlsConsumer(string m3u8Uri)
-        {
-            this._queue = new Queue<string>();
-            this._m3u8Uri = m3u8Uri;
         }
 
         public void Consume()
